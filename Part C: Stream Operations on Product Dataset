@@ -1,46 +1,66 @@
 //Part C: Stream Operations on Product Dataset
 
 
+
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 public class Part3 {
 
-    // Inner static Student class
-    static class Student {
+    static class Product {
         private String name;
-        private double marks;
+        private double price;
+        private String category;
 
-        public Student(String name, double marks) {
+        public Product(String name, double price, String category) {
             this.name = name;
-            this.marks = marks;
+            this.price = price;
+            this.category = category;
         }
 
         public String getName() { return name; }
-        public double getMarks() { return marks; }
+        public double getPrice() { return price; }
+        public String getCategory() { return category; }
 
         @Override
         public String toString() {
-            return name + " | Marks: " + marks;
+            return name + " | Category: " + category + " | Price: $" + price;
         }
     }
 
     public static void main(String[] args) {
-        List<Student> students = Arrays.asList(
-            new Student("Alice", 85.5),
-            new Student("Bob", 65.0),
-            new Student("Charlie", 90.0),
-            new Student("David", 72.3),
-            new Student("Eve", 78.0)
+        List<Product> products = Arrays.asList(
+            new Product("Laptop", 1200.0, "Electronics"),
+            new Product("Phone", 800.0, "Electronics"),
+            new Product("TV", 1500.0, "Electronics"),
+            new Product("Shirt", 50.0, "Clothing"),
+            new Product("Jeans", 80.0, "Clothing"),
+            new Product("Blender", 100.0, "Home Appliances"),
+            new Product("Oven", 300.0, "Home Appliances")
         );
 
-        List<String> topStudents = students.stream()
-            .filter(s -> s.getMarks() > 75)
-            .sorted(Comparator.comparingDouble(Student::getMarks).reversed())
-            .map(Student::getName)
-            .collect(Collectors.toList());
+        System.out.println("Part 3: Products Grouped by Category:");
+        Map<String, List<Product>> grouped = products.stream()
+            .collect(Collectors.groupingBy(Product::getCategory));
 
-        System.out.println("🎓 Students with Marks > 75% (Sorted by Marks):");
-        topStudents.forEach(System.out::println);
+        grouped.forEach((category, list) -> {
+            System.out.println(category + ":");
+            list.forEach(p -> System.out.println("  " + p));
+        });
+
+        System.out.println("\nMost Expensive Product in Each Category:");
+        Map<String, Optional<Product>> mostExpensive = products.stream()
+            .collect(Collectors.groupingBy(
+                Product::getCategory,
+                Collectors.maxBy(Comparator.comparingDouble(Product::getPrice))
+            ));
+
+        mostExpensive.forEach((category, product) -> {
+            System.out.println(category + ": " + product.orElse(null));
+        });
+
+        double avgPrice = products.stream()
+            .collect(Collectors.averagingDouble(Product::getPrice));
+        System.out.printf("\nAverage Price of All Products: $%.2f\n", avgPrice);
     }
 }
